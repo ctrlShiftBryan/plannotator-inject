@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PR Explainer — Inject Mode Fixture</title>
+  <style>
+    /* A hand-authored dark-themed doc with its own reset + CSS vars, used to
+       stress-test that the injected chrome's styles do not leak into the host
+       and the host's styles do not leak into the chrome. */
+    :root {
+      --bg: #0d1117;
+      --fg: #c9d1d9;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --code-bg: #161b22;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 2.5rem 1.5rem 4rem;
+      max-width: 820px;
+      margin-inline: auto;
+      background: var(--bg);
+      color: var(--fg);
+      font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, sans-serif;
+    }
+    h1, h2, h3, h4 { color: #fff; line-height: 1.25; margin-top: 2rem; }
+    h1 { font-size: 2rem; border-bottom: 1px solid var(--border); padding-bottom: .4rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.2rem; }
+    h4 { font-size: 1.02rem; color: var(--accent); }
+    a { color: var(--accent); }
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .12em .38em;
+      font: .87em ui-monospace, SFMono-Regular, monospace;
+      color: #e6edf3;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow: auto;
+    }
+    pre code { border: 0; padding: 0; background: none; }
+    section { margin-top: 1rem; }
+    .lede { color: var(--muted); font-size: 1.05rem; }
+  </style>
+</head>
+<body>
+  <h1>Componentize the Dynasty Screens</h1>
+  <p class="lede">This PR splits the monolithic screens module into reusable
+  components and wires them through the new navigation stack.</p>
+
+  <section id="overview">
+    <h2>Overview</h2>
+    <p>The screens previously lived in a single 2,000-line file. We extract each
+    screen into its own component and introduce a shared <code>ScreenShell</code>
+    wrapper that owns the header, scroll container, and safe-area insets.</p>
+    <h3>Goals</h3>
+    <p>Reduce coupling, make each screen independently testable, and unblock the
+    upcoming theming work. No behavior changes are intended in this PR.</p>
+  </section>
+
+  <section id="changes">
+    <h2>Key Changes</h2>
+    <h3>New components</h3>
+    <p>We add <code>ScreenShell</code>, <code>RosterCard</code>, and
+    <code>StatPill</code>. Each is a pure presentational component that takes its
+    data via props and emits intent callbacks.</p>
+    <h4>ScreenShell contract</h4>
+    <p>It accepts a <code>title</code>, an optional <code>onBack</code>, and
+    children. Internally it renders the navigation chrome.</p>
+    <pre><code>function ScreenShell({ title, onBack, children }) {
+  return (
+    &lt;View style={styles.shell}&gt;
+      &lt;Header title={title} onBack={onBack} /&gt;
+      &lt;ScrollView&gt;{children}&lt;/ScrollView&gt;
+    &lt;/View&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="verify">
+    <h2>How to verify</h2>
+    <h4>Manual verification in the browser</h4>
+    <p>Open each screen, confirm the header renders, and check that back
+    navigation pops the stack. Then run <code>yarn test screens</code>.</p>
+  </section>
+
+  <!-- Inject the Plannotator review chrome, like adding jQuery. -->
+  <script src="./inject.js"></script>
+</body>
+</html>
